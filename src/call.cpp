@@ -52,6 +52,7 @@
 #include "sipp.hpp"
 #include "auth.hpp"
 #include "deadcall.hpp"
+#include "sip_parser.hpp"
 
 #define callDebug(args...) do { if (useCallDebugf) { _callDebug( args ); } } while (0)
 
@@ -962,6 +963,10 @@ int call::send_raw(const char * msg, int index, int len)
 {
     struct sipp_socket *sock;
     int rc;
+
+    char contact_url[255];
+    getContactURL(msg, contact_url);
+    addKey(contact_url);
 
     callDebug("Sending %s message for call %s (index %d, hash %u):\n%s\n\n", TRANSPORT_TO_STRING(transport), id, index, hash(msg), msg);
 
@@ -2894,6 +2899,10 @@ bool call::process_incoming(char * msg, struct sockaddr_storage *src)
 
     setRunning();
 
+    // Correlate ourselves with this call-ID
+    const char *call_id = get_trimmed_call_id(msg);
+    addKey(call_id);
+    
     /* Ignore the messages received during a pause if -pause_msg_ign is set */
     if(call_scenario->messages[msg_index] -> M_type == MSG_TYPE_PAUSE && pause_msg_ign) return(true);
 

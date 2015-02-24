@@ -228,6 +228,8 @@ void print_statistics(int last)
     extern int command_mode;
     extern char *command_buffer;
 
+    setlinebuf(stdout);
+
     if(backgroundMode == false && display_scenario) {
         if(!last) {
             screen_clear();
